@@ -1,0 +1,45 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  width: fit-content;
+  height: fit-content;
+  position: relative;
+  /* transition: all 500ms ease-in-out; */
+  width: 100%;
+}
+
+.loggedInView {
+  width: 90vw;
+  max-width: 1000px;
+}
+
+.loggedOutView {
+  min-width: 320px;
+  max-width: 500px;
+  height: 250px;
+}
+
+.userInfoContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+}
+
+.userInfo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.giView {
+  padding: 10px;
+}
+.giContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}

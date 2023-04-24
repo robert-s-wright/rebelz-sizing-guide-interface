@@ -1,0 +1,23 @@
+.container {
+  background-color: black;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 0px 5px 0px;
+  gap: 10px;
+}
+
+.logo {
+  margin: 0px 50px;
+}
+
+.logo img {
+  width: 100%;
+}
+
+.title {
+  text-align: center;
+  font-size: 25px;
+}
