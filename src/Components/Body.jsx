@@ -45,7 +45,10 @@ const Body = () => {
   useEffect(() => {
     const auth = async () => {
       await authorize().then((response) => {
-        console.log(response);
+        if (response.status === 200) {
+          setUser(response.data);
+          setLoggedIn(true);
+        }
       });
     };
     auth();

@@ -39,7 +39,9 @@ const registerUser = async (user) => {
 const loginUser = async (user) => {
   try {
     const output = await axios
-      .post(userLoginAddress, user)
+      .post(userLoginAddress, user, {
+        withCredentials: true,
+      })
       .then((response) => response);
     return output;
   } catch (error) {
@@ -83,7 +85,11 @@ const getUserModels = async (user) => {
 
 const authorize = async () => {
   try {
-    const output = await axios.get(authAddress).then((response) => response);
+    const output = await axios
+      .get(authAddress, {
+        withCredentials: true,
+      })
+      .then((response) => response);
     return output;
   } catch (error) {
     return error.response;

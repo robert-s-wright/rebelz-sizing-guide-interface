@@ -42,8 +42,6 @@ const Dashboard = React.forwardRef((props, ref) => {
     comments: null,
   };
 
-  const selectedIndex = user.userMeasurements.length - 1;
-
   const inputFields = [
     "Arm",
     "Shoulders",
@@ -168,10 +166,6 @@ const Dashboard = React.forwardRef((props, ref) => {
     userSubmissions();
   }, []);
 
-  useEffect(() => {
-    console.log(user);
-  }, [user]);
-
   // useEffect(() => {
   //   console.log(userModels);
   // }, [userModels]);
@@ -188,6 +182,10 @@ const Dashboard = React.forwardRef((props, ref) => {
         } else return obj;
       }),
     }));
+  };
+
+  const handleLogout = () => {
+    //todo - create function
   };
 
   return (
@@ -478,7 +476,7 @@ const Dashboard = React.forwardRef((props, ref) => {
           </div>
         </>
       )}
-      <TableContainer>
+      <TableContainer className={styles.tableContainer}>
         <Table size="small">
           <TableHead>
             <TableRow>
@@ -542,6 +540,13 @@ const Dashboard = React.forwardRef((props, ref) => {
           </TableBody>
         </Table>
       </TableContainer>
+      <Button
+        variant="outlined"
+        color="error"
+        onClick={() => console.log("works")}
+      >
+        Log out
+      </Button>
     </div>
   );
 });
