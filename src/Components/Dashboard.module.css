@@ -7,7 +7,7 @@
 .userName {
   padding: 10px;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   margin: auto;
   /* grid-template-columns: repeat(auto-fit, minmax(250px, 300px)); */
@@ -39,14 +39,17 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-evenly;
-  padding: 10px;
+  /* padding: 10px; */
+}
+.textField {
+  width: 100%;
 }
 
 .buttonContainer {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 50px;
 }
 
 .tableContainer {

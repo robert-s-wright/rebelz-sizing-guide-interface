@@ -3,16 +3,15 @@ import React, { useEffect, useState, useRef } from "react";
 import Login from "./Login";
 import Register from "./Register";
 
-import { Zoom, Fade, Card } from "@mui/material";
-
-import { TransitionGroup } from "react-transition-group";
+import { Zoom, Fade, Card, CircularProgress } from "@mui/material";
 
 import styles from "./Body.module.css";
 import Dashboard from "./Dashboard";
 
 import { authorize } from "../requests";
 
-const Body = () => {
+const Body = (props) => {
+  const { setLoading } = props;
   const blankUser = {
     id: null,
     email: null,
@@ -39,20 +38,36 @@ const Body = () => {
   const [user, setUser] = useState(blankUser);
   const [loggedIn, setLoggedIn] = useState(false);
   const [registering, setRegistering] = useState(false);
+  // const [loading, setLoading] = useState(false);
 
-  const transitionTimeout = { enter: 500, exit: 0 };
+  const transitionTimeout = { enter: 500, exit: 200 };
 
   useEffect(() => {
     const auth = async () => {
       await authorize().then((response) => {
         if (response.status === 200) {
-          setUser(response.data);
-          setLoggedIn(true);
+          transitionToDashboard(response);
+        } else {
+          setLoading(false);
         }
       });
     };
     auth();
   }, []);
+
+  const transitionToDashboard = (response) => {
+    setLoading(false);
+    setUser(response.data);
+    setLoggedIn(true);
+  };
+
+  const transitionToLogin = () => {
+    setLoading(true);
+    setLoggedIn(false);
+    setLoading(false);
+  };
+
+  const transitionToRegistration = () => {};
 
   return (
     <div
@@ -62,6 +77,7 @@ const Body = () => {
     >
       <Fade
         in={!loggedIn && !registering}
+        mountOnEnter
         unmountOnExit
         timeout={transitionTimeout}
       >
@@ -82,6 +98,9 @@ const Body = () => {
         <Dashboard
           user={user}
           setUser={setUser}
+          setLoggedIn={setLoggedIn}
+          blankUser={blankUser}
+          transitionToLogin={transitionToLogin}
         />
       </Fade>
       <Fade

@@ -7,7 +7,14 @@ import styles from "./Register.module.css";
 import { registerUser } from "../requests";
 
 const Register = React.forwardRef((props, ref) => {
-  const { setUser, setRegistering, user, blankUser, ...rest } = props;
+  const {
+    setUser,
+    setRegistering,
+    user,
+    blankUser,
+    transitionToLogin,
+    ...rest
+  } = props;
 
   const blankValidation = {
     email: false,
@@ -45,6 +52,8 @@ const Register = React.forwardRef((props, ref) => {
   };
 
   const handleRegistration = async () => {
+    setValidation((state) => ({ ...state, attemptedRegister: true }));
+
     if (validation.email && validation.password) {
       const output = await registerUser(user);
 
@@ -129,16 +138,13 @@ const Register = React.forwardRef((props, ref) => {
       <div className={styles.buttons}>
         <Button
           variant="outlined"
-          onClick={() => {
-            handleRegistration();
-            setValidation((state) => ({ ...state, attemptedRegister: true }));
-          }}
+          onClick={() => handleRegistration()}
         >
           Register
         </Button>
         <Button
           variant="outlined"
-          onClick={() => setRegistering(false)}
+          onClick={() => transitionToLogin()}
         >
           Back to Login
         </Button>

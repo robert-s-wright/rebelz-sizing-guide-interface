@@ -27,10 +27,12 @@ import {
   patchUser,
   postUserModels,
   getUserModels,
+  logout,
 } from "../requests";
 
 const Dashboard = React.forwardRef((props, ref) => {
-  const { setUser, user, blankUser, ...rest } = props;
+  const { setUser, user, setLoggedIn, blankUser, transitionToLogin, ...rest } =
+    props;
 
   const blankUserModel = {
     id: null,
@@ -60,6 +62,7 @@ const Dashboard = React.forwardRef((props, ref) => {
   const [submit, setSubmitted] = useState(false);
 
   const [userModels, setUserModels] = useState([]);
+  const [alert, setAlert] = useState(false);
 
   const handleBrandChange = (value, index) => {
     setUserModels((state) => {
@@ -126,17 +129,21 @@ const Dashboard = React.forwardRef((props, ref) => {
   };
 
   const handleSubmit = async () => {
-    const userOutput = await patchUser(user);
+    if (userModels.filter((obj) => obj.id === null).length > 0) {
+      const userOutput = await patchUser(user);
 
-    const userModelOutput = await postUserModels({
-      user: user,
-      userModels: userModels,
-    });
+      const userModelOutput = await postUserModels({
+        user: user,
+        userModels: userModels,
+      });
 
-    if (userModelOutput.status === 200) {
-      setUser(userModelOutput.data.user);
-      setUserModels(userModelOutput.data.userModels);
-      setSubmitted(true);
+      if (userModelOutput.status === 200) {
+        setUser(userModelOutput.data.user);
+        setUserModels(userModelOutput.data.userModels);
+        setSubmitted(true);
+      }
+    } else {
+      setAlert(true);
     }
   };
 
@@ -166,10 +173,6 @@ const Dashboard = React.forwardRef((props, ref) => {
     userSubmissions();
   }, []);
 
-  // useEffect(() => {
-  //   console.log(userModels);
-  // }, [userModels]);
-
   const handleUserMeasurementChange = (value, field) => {
     setUser((state) => ({
       ...state,
@@ -184,9 +187,17 @@ const Dashboard = React.forwardRef((props, ref) => {
     }));
   };
 
-  const handleLogout = () => {
-    //todo - create function
+  const handleLogout = async () => {
+    const output = await logout();
+
+    if (output.status === 200) {
+      transitionToLogin();
+    }
   };
+
+  useEffect(() => {
+    console.log(userModels);
+  }, [userModels]);
 
   return (
     <div
@@ -194,10 +205,21 @@ const Dashboard = React.forwardRef((props, ref) => {
       ref={ref}
       className={styles.container}
     >
-      {submit ? (
+      <Collapse
+        in={submit}
+        unmountOnExit
+      >
         <Alert>Thanks for your submission {user.name}!</Alert>
-      ) : (
-        <>
+      </Collapse>
+
+      <>
+        <Collapse
+          in={alert}
+          unmountOnExit
+        >
+          <Alert>Please add a new gi to submit the form</Alert>
+        </Collapse>
+        <Collapse in={!submit}>
           <div className={styles.userName}>
             <TextField
               label="Name"
@@ -212,6 +234,13 @@ const Dashboard = React.forwardRef((props, ref) => {
                 }))
               }
             />
+            <Button
+              // variant="outlined"
+              color="error"
+              onClick={() => handleLogout()}
+            >
+              Log out
+            </Button>
           </div>
           <div className={styles.userInfo}>
             <TextField
@@ -282,7 +311,6 @@ const Dashboard = React.forwardRef((props, ref) => {
               />
             ))}
           </div>
-
           <div className={styles.infoContainer}>
             <TransitionGroup className={styles.giContainer}>
               {userModels.map((entry, index) => {
@@ -292,8 +320,8 @@ const Dashboard = React.forwardRef((props, ref) => {
                       key={index}
                       unmountOnExit
                       mountOnEnter
-                      appear={false}
-                      in={entry.id === null}
+                      appear
+                      in={true}
                     >
                       <Stack
                         spacing={1}
@@ -302,8 +330,11 @@ const Dashboard = React.forwardRef((props, ref) => {
                           maxWidth: 430,
                           padding: "10px",
                         }}
+                        justifyContent="space-evenly"
+                        alignItems="center"
                       >
                         <Autocomplete
+                          className={styles.textField}
                           options={brands}
                           value={
                             entry.brandId !== null
@@ -336,10 +367,12 @@ const Dashboard = React.forwardRef((props, ref) => {
                               {...params}
                               label="Brand"
                               size="small"
+                              className={styles.textField}
                             />
                           )}
                         />
                         <Autocomplete
+                          className={styles.textField}
                           options={
                             entry.brandId !== null
                               ? models.filter(
@@ -384,6 +417,7 @@ const Dashboard = React.forwardRef((props, ref) => {
                         />
 
                         <Autocomplete
+                          className={styles.textField}
                           options={
                             entry.modelId
                               ? sizes.filter((size) =>
@@ -439,7 +473,6 @@ const Dashboard = React.forwardRef((props, ref) => {
                           }
                           helperText="Please give a description of how the gi fits. Is it tight/loose? Do the legs or arms feel long or short compared to other gis you have tried?"
                         />
-
                         <Button onClick={() => handleRemoveEntry(index)}>
                           Remove
                         </Button>
@@ -449,104 +482,104 @@ const Dashboard = React.forwardRef((props, ref) => {
                 } else return null;
               })}
             </TransitionGroup>
+          </div>
+          <div className={styles.buttonContainer}>
             <Button
-              onClick={() =>
-                setUserModels((state) => [...state, blankUserModel])
-              }
+              onClick={() => {
+                setUserModels((state) => [...state, blankUserModel]);
+                setAlert(false);
+              }}
               color="success"
-              variant="outlined"
+              // variant="outlined"
             >
               Add Another Gi
             </Button>
-          </div>
-
-          <div className={styles.buttonContainer}>
-            <Button
-              variant="outlined"
-              color="error"
+            <Collapse
+              unmountOnExit
+              in={userModels.filter((obj) => obj.id === null).length > 0}
             >
-              Clear All
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={() => handleSubmit()}
-            >
-              Submit
-            </Button>
-          </div>
-        </>
-      )}
-      <TableContainer className={styles.tableContainer}>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell
-                colSpan={6}
-                align="center"
-                sx={{ fontWeight: "bold" }}
+              <Button onClick={() => handleSubmit()}>Submit</Button>
+              <Button
+                // variant="outlined"
+                color="warning"
+                onClick={() => {
+                  setUserModels(userModels.filter((obj) => obj.id !== null));
+                }}
               >
-                Previous Submissions
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Brand</TableCell>
-              <TableCell>Model</TableCell>
-              <TableCell>Size</TableCell>
-              <TableCell>Comments</TableCell>
-              <TableCell>Weight</TableCell>
-              <TableCell>Date</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {userModels
-              .filter((entry) => entry.id !== null)
-              .map((item) => {
-                const date = new Date(
-                  user.userMeasurements.find(
-                    (meas) => meas.id === item.userMeasurementId
-                  ).date
-                );
+                Clear All
+              </Button>
+            </Collapse>
+          </div>
+        </Collapse>
+      </>
+      <TableContainer className={styles.tableContainer}>
+        {userModels.length === 0 || user.id === null ? null : (
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  align="center"
+                  sx={{ fontWeight: "bold" }}
+                >
+                  Previous Submissions
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Brand</TableCell>
+                <TableCell>Model</TableCell>
+                <TableCell>Size</TableCell>
+                <TableCell>Comments</TableCell>
+                <TableCell>Weight</TableCell>
+                <TableCell>Date</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {userModels
+                .filter((entry) => entry.id !== null)
+                .map((item) => {
+                  const date = new Date(
+                    user.userMeasurements.find(
+                      (meas) => meas.id === item.userMeasurementId
+                    ).date
+                  );
 
-                return (
-                  <TableRow key={item.id}>
-                    <TableCell size="small">
-                      {
-                        brands.find((brand) => brand.id === item.brandId)
-                          .brandName
-                      }
-                    </TableCell>
-                    <TableCell size="small">
-                      {
-                        models.find((model) => model.id === item.modelId)
-                          .modelName
-                      }
-                    </TableCell>
-                    <TableCell size="small">
-                      {sizes.find((size) => size.id === item.sizeId).sizeName}
-                    </TableCell>
-                    <TableCell size="small">{item.comments}</TableCell>
-                    <TableCell size="small">
-                      {
-                        user.userMeasurements.find(
-                          (meas) => meas.id === item.userMeasurementId
-                        ).weight
-                      }{" "}
-                      Kg
-                    </TableCell>
-                    <TableCell size="small">{`${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`}</TableCell>
-                  </TableRow>
-                );
-              })}
-          </TableBody>
-        </Table>
+                  return (
+                    <TableRow key={item.id}>
+                      <TableCell size="small">
+                        {
+                          brands.find((brand) => brand.id === item.brandId)
+                            .brandName
+                        }
+                      </TableCell>
+                      <TableCell size="small">
+                        {
+                          models.find((model) => model.id === item.modelId)
+                            .modelName
+                        }
+                      </TableCell>
+                      <TableCell size="small">
+                        {sizes.find((size) => size.id === item.sizeId).sizeName}
+                      </TableCell>
+                      <TableCell size="small">{item.comments}</TableCell>
+                      <TableCell size="small">
+                        {
+                          user.userMeasurements.find(
+                            (meas) => meas.id === item.userMeasurementId
+                          ).weight
+                        }{" "}
+                        Kg
+                      </TableCell>
+                      <TableCell size="small">{`${date.getFullYear()}-${
+                        date.getMonth() + 1
+                      }-${date.getDate()}`}</TableCell>
+                    </TableRow>
+                  );
+                })}
+            </TableBody>
+          </Table>
+        )}
       </TableContainer>
-      <Button
-        variant="outlined"
-        color="error"
-        onClick={() => console.log("works")}
-      >
-        Log out
-      </Button>
     </div>
   );
 });

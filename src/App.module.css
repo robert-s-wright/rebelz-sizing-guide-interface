@@ -1,0 +1,30 @@
+.App {
+  text-align: center;
+  margin: 20px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  width: fit-content;
+  height: fit-content;
+  position: absolute;
+  /* transition: all 500ms ease-in-out; */
+  width: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.loggedInView {
+  width: 90vw;
+  max-width: 1000px;
+}
+
+.loggedOutView {
+  min-width: 320px;
+  max-width: 500px;
+  height: 400px;
+}

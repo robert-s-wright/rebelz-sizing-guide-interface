@@ -96,6 +96,17 @@ const authorize = async () => {
   }
 };
 
+const logout = async () => {
+  try {
+    const output = await axios
+      .get(`${authAddress}/logout`, { withCredentials: true })
+      .then((response) => response);
+    return output;
+  } catch (error) {
+    return error.response;
+  }
+};
+
 export {
   requestBrandsModelsSizes,
   patchUser,
@@ -104,4 +115,5 @@ export {
   postUserModels,
   getUserModels,
   authorize,
+  logout,
 };

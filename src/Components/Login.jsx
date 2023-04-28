@@ -35,7 +35,7 @@ const Login = React.forwardRef((props, ref) => {
   }, []);
 
   return (
-    <div
+    <form
       {...rest}
       className={styles.container}
       ref={ref}
@@ -87,13 +87,20 @@ const Login = React.forwardRef((props, ref) => {
       <div className={styles.buttons}>
         <Button
           variant="outlined"
-          onClick={() => handleLogin()}
+          onClick={(e) => {
+            e.preventDefault();
+            handleLogin();
+            return false;
+          }}
+          type="submit"
         >
           Log In
         </Button>
         <Button
           variant="outlined"
-          onClick={() => setRegistering(true)}
+          onClick={(e) => {
+            setRegistering(true);
+          }}
         >
           Register
         </Button>
@@ -107,7 +114,7 @@ const Login = React.forwardRef((props, ref) => {
       <Collapse in={showAlert}>
         <Alert severity="warning">{alert}</Alert>
       </Collapse>
-    </div>
+    </form>
   );
 });
 
