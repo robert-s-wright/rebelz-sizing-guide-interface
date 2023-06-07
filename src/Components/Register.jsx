@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from "react";
 
-import { TextField, Button, Link, Alert, Collapse } from "@mui/material";
+import { TextField, Button, Link, Alert, Collapse, Card } from "@mui/material";
 
 import styles from "./Register.module.css";
 
 import { registerUser } from "../requests";
 
+import Header from "./Header";
+
+import { motion } from "framer-motion";
+
+import { animation } from "./motion";
+
 const Register = React.forwardRef((props, ref) => {
-  const {
-    setUser,
-    setRegistering,
-    user,
-    blankUser,
-    transitionToLogin,
-    ...rest
-  } = props;
+  const { setUser, user, blankUser, navigate, ...rest } = props;
 
   const blankValidation = {
     email: false,
@@ -80,93 +79,104 @@ const Register = React.forwardRef((props, ref) => {
   }, []);
 
   return (
-    <div
-      {...rest}
-      className={styles.container}
-      ref={ref}
+    <motion.div
+      initial={animation.initial}
+      animate={animation.animate}
+      exit={animation.exit}
+      transition={animation.transition}
+      className={styles.wrapper}
     >
-      <div className={styles.inputFields}>
-        <TextField
-          label="E-mail"
-          name="email"
-          type="email"
-          value={user.email ? user.email : ""}
-          error={validation.attemptedRegister && !validation.email}
-          sx={{
-            ".MuiFormHelperText-root": {
-              textAlign: "center",
-              fontSize: ".7em",
-              lineHeight: "1em",
-            },
-          }}
-          onChange={(e) => {
-            setUser((state) => ({
-              ...state,
-              email: e.target.value,
-            }));
-            handleValidation(e.target.value, "email");
-          }}
-          helperText={
-            validation.attemptedRegister && !validation.email
-              ? "Please enter a valid email"
-              : null
-          }
-        />
-        <TextField
-          label="Password"
-          name="password"
-          type="password"
-          value={user.password ? user.password : ""}
-          error={validation.attemptedRegister && !validation.password}
-          sx={{
-            ".MuiFormHelperText-root": {
-              textAlign: "center",
-              fontSize: ".7em",
-              lineHeight: "1em",
-            },
-          }}
-          onChange={(e) => {
-            setUser((state) => ({
-              ...state,
-              password: e.target.value,
-            }));
-            handleValidation(e.target.value, "password");
-          }}
-          helperText="Minimum 8 characters containing least 1 letter and 1 number"
-        />
-      </div>
-      <div className={styles.buttons}>
-        <Button
-          variant="outlined"
-          onClick={() => handleRegistration()}
+      <Card>
+        <Header />
+        <div
+          {...rest}
+          className={styles.container}
+          ref={ref}
         >
-          Register
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={() => transitionToLogin()}
-        >
-          Back to Login
-        </Button>
-      </div>
-      <Collapse in={showAlert}>
-        <Alert
-          severity="warning"
-          sx={{ margin: "10px" }}
-        >
-          {alert}
-        </Alert>
-      </Collapse>
+          <div className={styles.inputFields}>
+            <TextField
+              label="E-mail"
+              name="email"
+              type="email"
+              value={user.email ? user.email : ""}
+              error={validation.attemptedRegister && !validation.email}
+              sx={{
+                ".MuiFormHelperText-root": {
+                  textAlign: "center",
+                  fontSize: ".7em",
+                  lineHeight: "1em",
+                },
+              }}
+              onChange={(e) => {
+                setUser((state) => ({
+                  ...state,
+                  email: e.target.value,
+                }));
+                handleValidation(e.target.value, "email");
+              }}
+              helperText={
+                validation.attemptedRegister && !validation.email
+                  ? "Please enter a valid email"
+                  : null
+              }
+            />
+            <TextField
+              label="Password"
+              name="password"
+              type="password"
+              value={user.password ? user.password : ""}
+              error={validation.attemptedRegister && !validation.password}
+              sx={{
+                ".MuiFormHelperText-root": {
+                  textAlign: "center",
+                  fontSize: ".7em",
+                  lineHeight: "1em",
+                },
+              }}
+              onChange={(e) => {
+                setUser((state) => ({
+                  ...state,
+                  password: e.target.value,
+                }));
+                handleValidation(e.target.value, "password");
+              }}
+              helperText="Minimum 8 characters containing least 1 letter and 1 number"
+            />
+          </div>
+          <div className={styles.buttons}>
+            <Button
+              variant="outlined"
+              onClick={() => handleRegistration()}
+            >
+              Register
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => navigate("/login")}
+            >
+              Back to Login
+            </Button>
+          </div>
+          <Collapse in={showAlert}>
+            <Alert
+              severity="warning"
+              sx={{ margin: "10px" }}
+            >
+              {alert}
+            </Alert>
+          </Collapse>
 
-      <Collapse in={showSuccess}>
-        <Alert
-          severity="success"
-          sx={{ margin: "10px" }}
-        >
-          {success}
-        </Alert>
-      </Collapse>
-    </div>
+          <Collapse in={showSuccess}>
+            <Alert
+              severity="success"
+              sx={{ margin: "10px" }}
+            >
+              {success}
+            </Alert>
+          </Collapse>
+        </div>
+      </Card>
+    </motion.div>
   );
 });
 

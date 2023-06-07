@@ -1,121 +1,143 @@
 import React, { useState, useEffect } from "react";
 
-import { TextField, Button, Link, Alert, Collapse } from "@mui/material";
+import { TextField, Button, Link, Alert, Collapse, Card } from "@mui/material";
 
 import styles from "./Login.module.css";
 
 import { loginUser } from "../requests";
 
-const Login = React.forwardRef((props, ref) => {
-  const { user, setUser, setRegistering, setLoggedIn, blankUser, ...rest } =
-    props;
+import Header from "./Header";
 
-  const [showAlert, setShowAlert] = useState(false);
-  const [alert, setAlert] = useState(null);
+import { motion } from "framer-motion";
 
-  const handleLogin = async () => {
-    const output = await loginUser(user);
+import { animation } from "./motion";
 
-    if (output.status === 200) {
-      setUser(output.data);
-      setLoggedIn(true);
-    } else if (output.status === 401) {
-      setAlert("Invaid username and/or password.");
+const Login = React.forwardRef(
+  (
+    { user, setUser, blankUser, navigate, setIsAuthenticated, ...rest },
+    ref
+  ) => {
+    const [showAlert, setShowAlert] = useState(false);
+    const [alert, setAlert] = useState(null);
 
-      setShowAlert(true);
-    } else {
-      setAlert("An unexpected error occurred, please try again.");
+    const handleLogin = async () => {
+      const output = await loginUser(user);
 
-      setShowAlert(true);
-    }
-  };
+      if (output.status === 200) {
+        setIsAuthenticated(true);
+        setUser(output.data);
 
-  useEffect(() => {
-    setUser(blankUser);
-  }, []);
+        navigate("dashboard");
+      } else if (output.status === 401) {
+        setAlert("Invaid username and/or password.");
 
-  return (
-    <form
-      {...rest}
-      className={styles.container}
-      ref={ref}
-    >
-      <div className={styles.inputFields}>
-        <TextField
-          label="E-mail"
-          name="email"
-          type="email"
-          value={user.email ? user.email : ""}
-          sx={{
-            ".MuiFormHelperText-root": {
-              textAlign: "center",
-              fontSize: ".7em",
-              lineHeight: "1em",
-            },
-          }}
-          onChange={(e) => {
-            setUser((state) => ({
-              ...state,
-              email: e.target.value,
-            }));
+        setShowAlert(true);
+      } else {
+        setAlert("An unexpected error occurred, please try again.");
 
-            setShowAlert(false);
-          }}
-        />
-        <TextField
-          label="Password"
-          name="password"
-          type="password"
-          value={user.password ? user.password : ""}
-          sx={{
-            ".MuiFormHelperText-root": {
-              textAlign: "center",
-              fontSize: ".7em",
-              lineHeight: "1em",
-            },
-          }}
-          onChange={(e) => {
-            setUser((state) => ({
-              ...state,
-              password: e.target.value,
-            }));
+        setShowAlert(true);
+      }
+    };
 
-            setShowAlert(false);
-          }}
-        />
-      </div>
-      <div className={styles.buttons}>
-        <Button
-          variant="outlined"
-          onClick={(e) => {
-            e.preventDefault();
-            handleLogin();
-            return false;
-          }}
-          type="submit"
-        >
-          Log In
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={(e) => {
-            setRegistering(true);
-          }}
-        >
-          Register
-        </Button>
-      </div>
-      <Link
-        underline="hover"
-        sx={{ cursor: "pointer" }}
+    useEffect(() => {
+      setUser(blankUser);
+    }, []);
+
+    return (
+      <motion.div
+        initial={animation.initial}
+        animate={animation.animate}
+        exit={animation.exit}
+        transition={animation.transition}
+        className={styles.wrapper}
       >
-        Forgot your username or password?
-      </Link>
-      <Collapse in={showAlert}>
-        <Alert severity="warning">{alert}</Alert>
-      </Collapse>
-    </form>
-  );
-});
+        <Card>
+          <Header />
+          <form
+            {...rest}
+            className={styles.container}
+            ref={ref}
+          >
+            <div className={styles.inputFields}>
+              <TextField
+                label="E-mail"
+                name="email"
+                type="email"
+                value={user.email ? user.email : ""}
+                sx={{
+                  ".MuiFormHelperText-root": {
+                    textAlign: "center",
+                    fontSize: ".7em",
+                    lineHeight: "1em",
+                  },
+                }}
+                onChange={(e) => {
+                  setUser((state) => ({
+                    ...state,
+                    email: e.target.value,
+                  }));
+
+                  setShowAlert(false);
+                }}
+              />
+              <TextField
+                label="Password"
+                name="password"
+                type="password"
+                value={user.password ? user.password : ""}
+                sx={{
+                  ".MuiFormHelperText-root": {
+                    textAlign: "center",
+                    fontSize: ".7em",
+                    lineHeight: "1em",
+                  },
+                }}
+                onChange={(e) => {
+                  setUser((state) => ({
+                    ...state,
+                    password: e.target.value,
+                  }));
+
+                  setShowAlert(false);
+                }}
+              />
+            </div>
+            <div className={styles.buttons}>
+              <Button
+                variant="outlined"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLogin();
+                  return false;
+                }}
+                type="submit"
+              >
+                Log In
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  navigate("/register");
+                }}
+              >
+                Register
+              </Button>
+            </div>
+            <Link
+              underline="hover"
+              sx={{ cursor: "pointer" }}
+              onClick={() => navigate("/recovery")}
+            >
+              Forgot your username or password?
+            </Link>
+            <Collapse in={showAlert}>
+              <Alert severity="warning">{alert}</Alert>
+            </Collapse>
+          </form>
+        </Card>
+      </motion.div>
+    );
+  }
+);
 
 export default Login;

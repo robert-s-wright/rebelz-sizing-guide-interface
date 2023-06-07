@@ -1,6 +1,7 @@
 .wrapper {
   width: 90vw;
-  max-width: 1000px;
+  max-width: 2000px;
+  height: 100%;
 }
 
 .container {
@@ -53,8 +54,14 @@
 .buttonContainer {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+}
+
+.submissionButtons {
+  display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 50px;
+  gap: 20px;
 }
 
 .tableContainer {

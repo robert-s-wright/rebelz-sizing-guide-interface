@@ -4,9 +4,9 @@ const brandModelSizeRequestAddress =
   "https://localhost:7287/api/BrandModelSizeRequest";
 
 const brandsAddress = "https://localhost:7287/api/Brands";
-const modelsAddress = "https://localhost:7287/api/Models";
+const modelsAddress = "https://localhost:7287/api/Model";
 const sizeAddress = "https://localhost:7287/api/Sizes";
-const modelSizeAddress = "https://localhost:7287/api/Model_Sizes";
+const modelSizeAddress = "https://localhost:7287/api/ModelSize";
 const userAddress = "https://localhost:7287/api/User";
 const userRegisterAddress = "https://localhost:7287/api/User/Register";
 const userLoginAddress = "https://localhost:7287/api/User/Login";
@@ -22,6 +22,33 @@ const requestBrandsModelsSizes = async () => {
     return output.data;
   } catch (error) {
     console.log(error);
+  }
+};
+
+const postBrand = async (brand) => {
+  try {
+    const output = await axios.post(brandsAddress, brand).then((data) => data);
+    return output;
+  } catch (error) {
+    return error.response;
+  }
+};
+
+const postModel = async (model) => {
+  try {
+    const output = await axios.post(modelsAddress, model).then((data) => data);
+    return output;
+  } catch (error) {
+    return error.response;
+  }
+};
+
+const postModelSizes = async (sizeModels) => {
+  console.log(sizeModels);
+  try {
+    return await axios.post(modelSizeAddress, sizeModels).then((data) => data);
+  } catch (error) {
+    return error.response;
   }
 };
 
@@ -107,8 +134,33 @@ const logout = async () => {
   }
 };
 
+const generatePasswordRecovery = async (email) => {
+  try {
+    const output = await axios
+      .post(`${authAddress}/generate/${email}`)
+      .then((response) => response);
+    return output;
+  } catch (error) {
+    return error.response;
+  }
+};
+
+const setNewPassword = async (recoveryModel) => {
+  try {
+    const output = await axios
+      .patch(`${authAddress}`, recoveryModel)
+      .then((response) => response);
+    return output;
+  } catch (error) {
+    return error.response;
+  }
+};
+
 export {
   requestBrandsModelsSizes,
+  postBrand,
+  postModel,
+  postModelSizes,
   patchUser,
   registerUser,
   loginUser,
@@ -116,4 +168,6 @@ export {
   getUserModels,
   authorize,
   logout,
+  generatePasswordRecovery,
+  setNewPassword,
 };

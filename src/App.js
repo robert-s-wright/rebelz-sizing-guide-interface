@@ -1,16 +1,28 @@
 import styles from "./App.module.css";
 
-import { Card, CircularProgress, Fade } from "@mui/material";
+import { Card, CircularProgress } from "@mui/material";
 
 import { authorize } from "./requests";
 
 import Login from "./Components/Login";
 import Dashboard from "./Components/Dashboard";
 import Register from "./Components/Register";
+import Recovery from "./Components/Recovery";
+import ResetPass from "./Components/ResetPass";
+import AdminLogin from "./Components/AdminLogin";
+import AdminPanel from "./Components/AdminPanel";
 
-import Header from "./Components/Header";
-// import Body from "./Components/Body";
 import { useState, useEffect } from "react";
+
+import {
+  Route,
+  Routes,
+  useNavigate,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
+
+import { AnimatePresence } from "framer-motion";
 
 function App() {
   const blankUser = {
@@ -36,106 +48,93 @@ function App() {
     ],
   };
 
-  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(blankUser);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [registering, setRegistering] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const transitionTimeout = { enter: 500, exit: 200 };
+  const navigate = useNavigate();
+
+  const location = useLocation();
 
   useEffect(() => {
     const auth = async () => {
       await authorize().then((response) => {
         if (response.status === 200) {
-          transitionToDashboard(response);
+          setIsAuthenticated(true);
+          navigate("dashboard");
+          setUser(response.data);
         } else {
-          setLoading(false);
+          if (location.pathname === "/") {
+            navigate("/login");
+          } else {
+            return;
+          }
         }
       });
     };
     auth();
   }, []);
 
-  const transitionToDashboard = (response) => {
-    setLoading(false);
-    setUser(response.data);
-    setLoggedIn(true);
-  };
-
-  const transitionToLogin = () => {
-    setLoading(true);
-    setLoggedIn(false);
-    setRegistering(false);
-    setLoading(false);
-  };
-
-  const transitionToRegistration = () => {
-    setLoading(true);
-    setRegistering(true);
-    setLoading(false);
+  const props = {
+    user,
+    blankUser,
+    setUser,
+    navigate,
+    setIsAuthenticated,
+    isAuthenticated,
   };
 
   return (
-    <>
-      <Fade
-        in={loading}
-        unmountOnExit
+    <AnimatePresence mode="wait">
+      <Routes
+        location={location}
+        key={location.pathname}
       >
-        <CircularProgress />
-      </Fade>
-      <Fade
-        in={!loggedIn && !registering && !loading}
-        mountOnEnter
-        unmountOnExit
-        timeout={transitionTimeout}
-      >
-        <Card className={`${styles.container} ${styles.loggedOutView}`}>
-          <Header />
-          <Login
-            user={user}
-            setUser={setUser}
-            setRegistering={setRegistering}
-            setLoggedIn={setLoggedIn}
-            blankUser={blankUser}
-            transitionToDashboard={transitionToDashboard}
-            transitionToRegistration={transitionToRegistration}
-          />
-        </Card>
-      </Fade>
+        <Route
+          path="/"
+          element={<CircularProgress />}
+        />
+        <Route
+          path="/login"
+          element={<Login {...props} />}
+        />
+        <Route
+          path="/register"
+          element={<Register {...props} />}
+        />
 
-      <Fade
-        in={loggedIn && !loading}
-        unmountOnExit
-        timeout={transitionTimeout}
-      >
-        <Card className={`${styles.container} ${styles.loggedInView}`}>
-          <Header />
-          <Dashboard
-            user={user}
-            setUser={setUser}
-            setLoggedIn={setLoggedIn}
-            blankUser={blankUser}
-            transitionToLogin={transitionToLogin}
-          />
-        </Card>
-      </Fade>
-      <Fade
-        in={!loggedIn && registering}
-        unmountOnExit
-        timeout={transitionTimeout}
-      >
-        <Card className={`${styles.container} ${styles.loggedOutView}`}>
-          <Header />
-          <Register
-            user={user}
-            setUser={setUser}
-            setRegistering={setRegistering}
-            blankUser={blankUser}
-            transitionToLogin={transitionToLogin}
-          />
-        </Card>
-      </Fade>
-    </>
+        <Route
+          path="/dashboard"
+          element={
+            isAuthenticated ? (
+              <Dashboard {...props} />
+            ) : (
+              <Navigate
+                replace
+                to="/login"
+              />
+            )
+          }
+        />
+
+        <Route
+          path="/recovery"
+          element={<Recovery {...props} />}
+        />
+        <Route
+          exact
+          path="/reset/:userId/*"
+          element={<ResetPass {...props} />}
+        />
+        <Route
+          path="/admin"
+          element={<AdminLogin {...props} />}
+        />
+        <Route
+          path="/admindashboard"
+          element={<AdminPanel {...props} />}
+        />
+      </Routes>
+    </AnimatePresence>
   );
 }
 
