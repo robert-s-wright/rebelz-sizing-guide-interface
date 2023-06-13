@@ -132,4 +132,4 @@ const SizeBadge = ({ modelSize, activeSize, activeMeasurement }) => {
   );
 };
 
-export default SizeBadge;
+export default React.memo(SizeBadge);

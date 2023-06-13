@@ -14,30 +14,11 @@ import {
   Button,
   Collapse,
   Alert,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  OutlinedInput,
-  FormControlLabel,
-  Checkbox,
-  Paper,
-  InputAdornment,
+  AppBar,
 } from "@mui/material";
 
-import { TransitionGroup } from "react-transition-group";
-
-import {
-  AddCircle,
-  Check,
-  CheckCircle,
-  Close,
-  Error,
-} from "@mui/icons-material";
-
 import { postModel, postModelSizes } from "../requests";
-import SizeBadge from "./SizeBadge";
-import NewSizesMenu from "./NewSizesMenu";
+
 import ModelRow from "./ModelRow";
 
 const BrandModal = ({
@@ -47,7 +28,7 @@ const BrandModal = ({
   modelSizes,
   setModelSizes,
   sizes,
-  measurements,
+  // measurements,
   setModels,
   setEditingBrand,
 }) => {
@@ -138,7 +119,6 @@ const BrandModal = ({
   };
 
   const handleCancel = () => {
-    setEditingBrand(null);
     setModels(models.filter((model) => model.id !== null));
     setModelSizes(modelSizes.filter((modelSize) => modelSize.id !== null));
     // setCopyingSizes(null);
@@ -195,235 +175,294 @@ const BrandModal = ({
   };
 
   return (
-    <>
-      <Modal open={editingBrand !== null}>
-        <Card
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "auto",
-            maxWidth: "max(80vw, 2000px)",
-            bgcolor: "background.paper",
-            border: "2px solid #000",
-            boxShadow: 10,
-            p: 4,
-            overflowY: "scroll",
-            height: "80vh",
-          }}
+    <Modal open={editingBrand !== null}>
+      <Card
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "auto",
+          maxWidth: "max(80vw, 2000px)",
+          bgcolor: "background.paper",
+          border: "2px solid #000",
+          boxShadow: 10,
+          p: 4,
+          overflowY: "auto",
+          height: "80vh",
+        }}
+      >
+        <Stack
+          spacing={1}
+          direction="column"
+          alignItems="center"
         >
-          <Stack
-            spacing={1}
-            direction="column"
-            alignItems="center"
-            padding={2}
+          <AppBar
+            sx={{ backgroundColor: "black" }}
+            position="sticky"
           >
-            <Typography variant="h4">
-              Editing{" "}
-              {editingBrand !== null
-                ? brands.find((brand) => brand.id === editingBrand).brandName
-                : null}
-            </Typography>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell
-                    align="center"
-                    sx={{ fontWeight: "bold" }}
-                  >
-                    Models
-                  </TableCell>
-
-                  <TableCell
-                    align="center"
-                    sx={{ fontWeight: "bold" }}
-                  >
-                    Sizes
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {models
-                  .filter(
-                    (model) =>
-                      model.brandId === editingBrand && model.id !== null
-                  )
-                  .sort((a, b) => a.modelName.localeCompare(b.modelName))
-                  .map((model) => {
-                    return (
-                      <ModelRow
-                        model={model}
-                        modelIdToAddSizesTo={modelIdToAddSizesTo}
-                        setModelIdToAddSizesTo={setModelIdToAddSizesTo}
-                        addingMeasurement={addingMeasurement}
-                        sizes={sizes}
-                        modelSizes={modelSizes}
-                        setModelSizes={setModelSizes}
-                        models={models}
-                        editingBrand={editingBrand}
-                        measurements={measurements}
-                      />
-                    );
-                  })}
-              </TableBody>
-            </Table>
-
-            <Stack align="center">
-              <Collapse
-                unmountOnExit
-                in={models.filter((model) => model.id === null).length > 0}
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              p={2}
+              gap={10}
+              // sx={{ backgroundColor: "black" }}
+            >
+              <Typography variant="h4">
+                Editing{" "}
+                {editingBrand !== null
+                  ? brands.find((brand) => brand.id === editingBrand).brandName
+                  : null}
+              </Typography>
+              <Stack
+                direction="row"
+                gap={1}
+                alignItems="center"
               >
-                {models
-                  .filter(
+                {/* Save new sizes Modal*/}
+                <Collapse
+                  unmountOnExit
+                  in={
+                    modelSizes.filter((modelSize) => modelSize.id === null)
+                      .length > 0
+                  }
+                  // orientation="horizontal"
+                >
+                  <Button
+                    color="success"
+                    onClick={() => handleSaveCopiedSizesToDb()}
+                    variant="contained"
+                    size="small"
+                  >
+                    Save Changes
+                  </Button>
+                </Collapse>
+
+                {/* Cancel New Model*/}
+                <Collapse
+                  unmountOnExit
+                  in={
+                    modelSizes.filter((modelSize) => modelSize.id === null)
+                      .length > 0
+                  }
+                  orientation="horizontal"
+                >
+                  <Button
+                    color="error"
+                    onClick={() => handleCancel()}
+                    sx={{ whiteSpace: "nowrap" }}
+                    variant="contained"
+                    size="small"
+                  >
+                    Cancel All Changes
+                  </Button>
+                </Collapse>
+                <Collapse
+                  in={
+                    models.filter((model) => model.id === null).length === 0 &&
+                    !showAlert &&
+                    !showError
+                  }
+                  sx={{ "&.Mui-Collapse-wrapper": { height: "100%" } }}
+                >
+                  <Button
+                    onClick={(e) => handleAddModel(editingBrand, e)}
+                    color="success"
+                    variant="contained"
+                    size="small"
+                  >
+                    Add New Model
+                  </Button>
+                </Collapse>
+                <Button
+                  color="error"
+                  onClick={() => handleClose()}
+                  variant="contained"
+                  height="auto"
+                  size="small"
+                >
+                  Close
+                </Button>
+              </Stack>
+            </Stack>
+          </AppBar>
+          <Stack align="center">
+            <Collapse
+              in={showError}
+              unmountOnExit
+            >
+              <Alert
+                children={error}
+                severity="warning"
+              />
+            </Collapse>
+            <Collapse
+              in={showAlert}
+              unmountOnExit
+            >
+              <Alert
+                children={alert}
+                severity="success"
+              />
+            </Collapse>
+            <Collapse
+              in={showCopyToDbError}
+              unmountOnExit
+            >
+              <Alert
+                children={copyToDbError}
+                severity="warning"
+              />
+            </Collapse>
+            <Collapse
+              in={showCopyToDbAlert}
+              unmountOnExit
+            >
+              <Alert
+                children={copyToDbAlert}
+                severity="success"
+              />
+            </Collapse>
+          </Stack>
+          <Collapse
+            unmountOnExit
+            in={models.filter((model) => model.id === null).length > 0}
+          >
+            <Stack direction="row">
+              <TextField
+                size="small"
+                label="New Model Name"
+                onChange={(e) =>
+                  setModels(() => {
+                    return models.map((obj) => {
+                      if (obj.id === null) {
+                        return {
+                          ...obj,
+                          modelName: e.target.value,
+                        };
+                      } else return obj;
+                    });
+                  })
+                }
+                value={
+                  models.find(
                     (model) =>
                       model.brandId === editingBrand && model.id === null
-                  )
-                  .map((model) => {
-                    return (
-                      <Stack
-                        direction="row"
-                        key={model.id}
-                      >
-                        <TextField
-                          size="small"
-                          label="New Model Name"
-                          onChange={(e) =>
-                            setModels(() => {
-                              return models.map((obj) => {
-                                if (obj.id === null) {
-                                  return {
-                                    ...obj,
-                                    modelName: e.target.value,
-                                  };
-                                } else return obj;
-                              });
-                            })
-                          }
-                          value={model.modelName ? model.modelName : ""}
-                        />
-                        <Button onClick={() => handleSaveModelToDb()}>
-                          Save Model
-                        </Button>
-                        <Button
-                          onClick={() =>
-                            setModels(
-                              models.filter((model) => model.id !== null)
-                            )
-                          }
-                          color="error"
-                        >
-                          Cancel
-                        </Button>
-                      </Stack>
-                    );
-                  })}
-              </Collapse>
-              <Collapse
-                in={showError}
-                unmountOnExit
+                  ) !== undefined
+                    ? models.find(
+                        (model) =>
+                          model.brandId === editingBrand && model.id === null
+                      ).modelName
+                    : ""
+                }
+                sx={{ whiteSpace: "nowrap" }}
+              />
+              <Button
+                onClick={() => handleSaveModelToDb()}
+                sx={{ whiteSpace: "nowrap" }}
               >
-                <Alert
-                  children={error}
-                  severity="warning"
-                />
-              </Collapse>
-              <Collapse in={showAlert}>
-                <Alert
-                  children={alert}
-                  severity="success"
-                />
-              </Collapse>
-              <Collapse
-                in={showCopyToDbError}
-                unmountOnExit
+                Save Model
+              </Button>
+              <Button
+                onClick={() =>
+                  setModels(models.filter((model) => model.id !== null))
+                }
+                color="error"
+                sx={{ whiteSpace: "nowrap" }}
               >
-                <Alert
-                  children={copyToDbError}
-                  severity="warning"
-                />
-              </Collapse>
-              <Collapse in={showCopyToDbAlert}>
-                <Alert
-                  children={copyToDbAlert}
-                  severity="success"
-                />
-              </Collapse>
-              <Collapse in={modelIdToAddSizesTo === null}>
-                <Stack
-                  spacing={1}
-                  direction="row"
-                >
-                  <Collapse
-                    unmountOnExit
-                    in={
-                      models.filter((model) => model.id === null).length ===
-                        0 &&
-                      !showAlert &&
-                      !showError
-                    }
-                  >
-                    <Button
-                      onClick={(e) => handleAddModel(editingBrand, e)}
-                      color="success"
-                    >
-                      Add New Model
-                    </Button>
-                  </Collapse>
-                  <Collapse
-                    unmountOnExit
-                    in={
-                      modelSizes.filter((modelSize) => modelSize.id === null)
-                        .length > 0
-                    }
-                    orientation="horizontal"
-                  >
-                    <Button
-                      color="success"
-                      onClick={() => handleSaveCopiedSizesToDb()}
-                      sx={{ whiteSpace: "nowrap" }}
-                    >
-                      Save Changes
-                    </Button>
-                  </Collapse>
-                  <Collapse
-                    unmountOnExit
-                    in={
-                      modelSizes.filter((modelSize) => modelSize.id === null)
-                        .length > 0
-                    }
-                    orientation="horizontal"
-                  >
-                    <Button
-                      color="error"
-                      onClick={() => handleCancel()}
-                    >
-                      Cancel
-                    </Button>
-                  </Collapse>
-                  <Collapse
-                    unmountOnExit
-                    in={
-                      modelSizes.filter((modelSize) => modelSize.id === null)
-                        .length === 0 &&
-                      models.filter((model) => model.id === null).length === 0
-                    }
-                    orientation="horizontal"
-                  >
-                    <Button
-                      color="warning"
-                      onClick={() => handleCancel()}
-                    >
-                      Close
-                    </Button>
-                  </Collapse>
-                </Stack>
-              </Collapse>
+                Cancel
+              </Button>
             </Stack>
+          </Collapse>
+          <Table
+            sx={{
+              "&.MuiTable-root": {
+                margin: "1rem",
+              },
+            }}
+          >
+            <TableHead>
+              <TableRow>
+                <TableCell
+                  align="center"
+                  sx={{ fontWeight: "bold" }}
+                >
+                  Models
+                </TableCell>
+
+                <TableCell
+                  align="center"
+                  sx={{ fontWeight: "bold" }}
+                >
+                  Sizes
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {models
+                .filter(
+                  (model) => model.brandId === editingBrand && model.id !== null
+                )
+                .sort((a, b) => a.modelName.localeCompare(b.modelName))
+                .map((model) => {
+                  return (
+                    <ModelRow
+                      model={model}
+                      modelIdToAddSizesTo={modelIdToAddSizesTo}
+                      setModelIdToAddSizesTo={setModelIdToAddSizesTo}
+                      addingMeasurement={addingMeasurement}
+                      sizes={sizes}
+                      modelSizes={modelSizes}
+                      setModelSizes={setModelSizes}
+                      models={models}
+                      editingBrand={editingBrand}
+                    />
+                  );
+                })}
+            </TableBody>
+          </Table>
+
+          <Stack align="center">
+            <Collapse
+              in={showError}
+              unmountOnExit
+            >
+              <Alert
+                children={error}
+                severity="warning"
+              />
+            </Collapse>
+            <Collapse
+              in={showAlert}
+              unmountOnExit
+            >
+              <Alert
+                children={alert}
+                severity="success"
+              />
+            </Collapse>
+            <Collapse
+              in={showCopyToDbError}
+              unmountOnExit
+            >
+              <Alert
+                children={copyToDbError}
+                severity="warning"
+              />
+            </Collapse>
+            <Collapse
+              in={showCopyToDbAlert}
+              unmountOnExit
+            >
+              <Alert
+                children={copyToDbAlert}
+                severity="success"
+              />
+            </Collapse>
           </Stack>
-        </Card>
-      </Modal>
-    </>
+        </Stack>
+      </Card>
+    </Modal>
   );
 };
 

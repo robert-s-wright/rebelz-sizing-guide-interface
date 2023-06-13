@@ -43,6 +43,15 @@ const postModel = async (model) => {
   }
 };
 
+const postSizes = async (sizes) => {
+  try {
+    const output = await axios.post(sizeAddress, sizes).then((data) => data);
+    return output;
+  } catch (error) {
+    return error.response;
+  }
+};
+
 const postModelSizes = async (sizeModels) => {
   console.log(sizeModels);
   try {
@@ -160,6 +169,7 @@ export {
   requestBrandsModelsSizes,
   postBrand,
   postModel,
+  postSizes,
   postModelSizes,
   patchUser,
   registerUser,

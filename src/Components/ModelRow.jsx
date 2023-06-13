@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, createContext, useContext } from "react";
 
 import {
   Collapse,
@@ -17,10 +17,14 @@ import {
   Table,
   TextField,
   InputAdornment,
+  tableCellClasses,
 } from "@mui/material";
 
 import SizeBadge from "./SizeBadge";
-import NewSizesMenu from "./NewSizesMenu";
+import SizesMenu from "./SizesMenu";
+
+import { PropContext } from "./AdminPanel";
+import MeasurementsMenu from "./MeasurementsMenu";
 
 const ModelRow = ({
   model,
@@ -31,13 +35,15 @@ const ModelRow = ({
   sizes,
   modelSizes,
   setModelSizes,
-  measurements,
+  // measurements,
 }) => {
   const [sizesToCopy, setSizesToCopy] = useState(null);
   const [copyingSizes, setCopyingSizes] = useState(null);
   const [copyError, setCopyError] = useState(null);
   const [showCopyError, setShowCopyError] = useState(false);
   const [addingMeasurement, setAddingMeasurement] = useState(null);
+
+  const measurements = useContext(PropContext);
 
   //copy size handlers
   const handleCopySizes = (id) => {
@@ -89,28 +95,39 @@ const ModelRow = ({
     (modelSize) => modelSize.modelId === model.id
   );
 
-  const inputFields = [
-    { key: "wingspan", label: "Wingspan" },
-    { key: "jacketHeight", label: "Jacket Height" },
-    { key: "jacketWidth", label: "Jacket Width" },
-    { key: "wrist", label: "Wrist" },
-    { key: "waist", label: "Waist" },
-    { key: "pantsLengthFront", label: "Pants Length Front" },
-    { key: "pantsLengthBack", label: "Pants Length Back" },
-    { key: "pantsAnkle", label: "Ankle" },
-    { key: "pantsCrotch", label: "Crotch" },
-  ];
+  const measurementMenuProps = {
+    addingMeasurement,
+    model,
+    matchingModelSizes,
+    sizes,
+    measurements,
+    handleMeasurementChange,
+    setAddingMeasurement,
+  };
 
   return (
-    <Collapse
-      in={
-        (modelIdToAddSizesTo === null || modelIdToAddSizesTo === model.id) &&
-        (addingMeasurement === null || addingMeasurement === model.id)
-      }
+    <TableRow
+      key={model.id}
+      sx={{
+        "&:last-child td": { borderBottom: "none" },
+      }}
     >
-      <TableRow key={model.id}>
-        <TableCell align="center">{model.modelName}</TableCell>
-        <TableCell>
+      <TableCell
+        align="center"
+        size="small"
+      >
+        <Collapse
+          in
+          appear
+        >
+          <Typography>{model.modelName}</Typography>
+        </Collapse>
+      </TableCell>
+      <TableCell size="small">
+        <Collapse
+          in
+          appear
+        >
           <Stack
             align="center"
             justifyContent="center"
@@ -123,6 +140,7 @@ const ModelRow = ({
               alignContent="center"
               justifyContent="center"
               marginBottom={1}
+              marginTop={1}
             >
               {matchingModelSizes.map((modelSize, index) => {
                 const activeSize = sizes.find(
@@ -134,24 +152,15 @@ const ModelRow = ({
                 );
 
                 return (
-                  //  Size Badges
-                  <Collapse
-                    appear
-                    in={
-                      modelIdToAddSizesTo !== model.id &&
-                      addingMeasurement !== model.id
-                    }
-                    key={index}
-                  >
-                    <SizeBadge
-                      modelSize={modelSize}
-                      activeSize={activeSize}
-                      activeMeasurement={activeMeasurement}
-                    />
-                  </Collapse>
+                  <SizeBadge
+                    modelSize={modelSize}
+                    activeSize={activeSize}
+                    activeMeasurement={activeMeasurement}
+                  />
                 );
               })}
             </Stack>
+
             {/* No Sizes Notification */}
             <Collapse
               in={
@@ -162,43 +171,52 @@ const ModelRow = ({
             >
               <Typography textAlign="center">No Sizes</Typography>
             </Collapse>
+
+            {/* New Sizes Menu */}
+            <SizesMenu
+              model={model}
+              modelIdToAddSizesTo={modelIdToAddSizesTo}
+              setModelIdToAddSizesTo={setModelIdToAddSizesTo}
+              addingMeasurement={addingMeasurement}
+              sizes={sizes}
+              modelSizes={modelSizes}
+              setModelSizes={setModelSizes}
+            />
+
+            {/* Edit Measurements Menu */}
+            <MeasurementsMenu {...measurementMenuProps} />
+
             {/* Command Buttons */}
-            <Collapse
-              in={
-                copyingSizes !== model.id &&
-                modelIdToAddSizesTo !== model.id &&
-                addingMeasurement !== model.id
-              }
+
+            <Stack
+              direction="row"
+              align="center"
+              justifyContent="center"
+              gap={1}
             >
-              <Stack
-                direction="row"
-                align="center"
-                justifyContent="center"
-                gap={1}
+              <Button
+                onClick={() => setModelIdToAddSizesTo(model.id)}
+                color="success"
+                size="small"
               >
-                <Button
-                  onClick={() => setModelIdToAddSizesTo(model.id)}
-                  color="success"
-                  size="small"
-                >
-                  Edit Sizes
-                </Button>
-                <Button
-                  onClick={() => handleCopySizes(model.id)}
-                  color="success"
-                  size="small"
-                >
-                  Copy Sizes From Model
-                </Button>
-                <Button
-                  onClick={() => handleAddMeasurements(model.id)}
-                  color="success"
-                  size="small"
-                >
-                  Edit Measurements
-                </Button>
-              </Stack>
-            </Collapse>
+                Edit Sizes
+              </Button>
+              <Button
+                onClick={() => handleCopySizes(model.id)}
+                color="success"
+                size="small"
+              >
+                Copy Sizes From Model
+              </Button>
+              <Button
+                onClick={() => handleAddMeasurements(model.id)}
+                color="success"
+                size="small"
+              >
+                Edit Measurements
+              </Button>
+            </Stack>
+
             {/* Copy Sizes Menu */}
             <Collapse
               in={
@@ -272,105 +290,11 @@ const ModelRow = ({
                 </Collapse>
               </Stack>
             </Collapse>
-            {/* New Sizes Menu */}
-            <NewSizesMenu
-              model={model}
-              modelIdToAddSizesTo={modelIdToAddSizesTo}
-              setModelIdToAddSizesTo={setModelIdToAddSizesTo}
-              addingMeasurement={addingMeasurement}
-              sizes={sizes}
-              modelSizes={modelSizes}
-              setModelSizes={setModelSizes}
-            />
-
-            {/* Edit Measurements Menu */}
-            <Collapse in={addingMeasurement === model.id}>
-              <Stack
-                direction="row"
-                justifyContent="center"
-                alignItems="center"
-              ></Stack>
-              <Stack gap={1}>
-                <Paper sx={{ padding: 2 }}>
-                  <Typography variant="h6">Adult Sizes</Typography>
-
-                  <Stack
-                    direction="row"
-                    spacing={0}
-                    flexWrap="wrap"
-                    // sx={{ maxHeight: "50vh" }}
-                  >
-                    <Table>
-                      {matchingModelSizes.map((modelSize) => {
-                        return (
-                          <TableRow>
-                            <TableCell>
-                              {
-                                sizes.find(
-                                  (size) => size.id === modelSize.sizeId
-                                ).sizeName
-                              }
-                            </TableCell>
-                            <TableCell>
-                              <Stack
-                                direction="row"
-                                gap={1}
-                                flexWrap="wrap"
-                              >
-                                {inputFields.map((inputField) => {
-                                  return (
-                                    <TextField
-                                      size="small"
-                                      value={
-                                        measurements.find(
-                                          (measurement) =>
-                                            measurement.id === modelSize.measId
-                                        )
-                                          ? measurements.find(
-                                              (measurement) =>
-                                                measurement.id ===
-                                                modelSize.measId
-                                            )[inputField.key]
-                                          : ""
-                                      }
-                                      onChange={(e) =>
-                                        handleMeasurementChange(
-                                          e,
-                                          modelSize.id,
-                                          inputField.key
-                                        )
-                                      }
-                                      label={inputField.label}
-                                      InputProps={{
-                                        endAdornment: (
-                                          <InputAdornment>cm</InputAdornment>
-                                        ),
-                                      }}
-                                    />
-                                  );
-                                })}
-                              </Stack>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </Table>
-                  </Stack>
-                </Paper>
-
-                <Button
-                  sx={{ alignSelf: "center" }}
-                  color="success"
-                  onClick={() => setAddingMeasurement(null)}
-                >
-                  Done
-                </Button>
-              </Stack>
-            </Collapse>
           </Stack>
-        </TableCell>
-      </TableRow>
-    </Collapse>
+        </Collapse>
+      </TableCell>
+    </TableRow>
+    // </Collapse>
   );
 };
 

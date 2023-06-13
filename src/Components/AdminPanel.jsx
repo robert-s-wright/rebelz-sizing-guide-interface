@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext } from "react";
 
 import {
   Card,
@@ -13,10 +13,6 @@ import {
   TableHead,
   Stack,
   Chip,
-  Modal,
-  Checkbox,
-  FormGroup,
-  FormControlLabel,
 } from "@mui/material";
 
 import { styled } from "@mui/material/styles";
@@ -34,20 +30,22 @@ import { animation } from "./motion";
 import styles from "./AdminPanel.module.css";
 
 import { logout, requestBrandsModelsSizes, postBrand } from "../requests";
+import NewSizesMenu from "./NewSizesMenu";
+
+export const PropContext = createContext(null);
 
 const AdminPanel = ({ navigate, setIsAuthenticated }) => {
   //db data
   const [brands, setBrands] = useState([]);
-  const [addingBrand, setAddingBrand] = useState(false);
-
-  const [editingBrand, setEditingBrand] = useState(null);
-
   const [models, setModels] = useState([]);
   const [modelSizes, setModelSizes] = useState([]);
-
   const [sizes, setSizes] = useState([]);
   const [measurements, setMeasurements] = useState([]);
 
+  const [updatingSizes, setUpdatingSizes] = useState(false);
+
+  const [addingBrand, setAddingBrand] = useState(false);
+  const [editingBrand, setEditingBrand] = useState(null);
   //commands
 
   const handleLogout = async () => {
@@ -107,7 +105,6 @@ const AdminPanel = ({ navigate, setIsAuthenticated }) => {
     modelSizes,
     setModelSizes,
     sizes,
-    measurements,
     setModels,
     setEditingBrand,
   };
@@ -123,7 +120,11 @@ const AdminPanel = ({ navigate, setIsAuthenticated }) => {
       <Card>
         <Header location="Admin Panel" />
         <div className={styles.container}>
-          <div className={styles.buttonContainer}>
+          <Stack
+            direction="row"
+            justifyContent="flex-start"
+            gap={1}
+          >
             <Button
               variant="outlined"
               color="error"
@@ -131,7 +132,13 @@ const AdminPanel = ({ navigate, setIsAuthenticated }) => {
             >
               Log out
             </Button>
-          </div>
+            <Button
+              variant="outlined"
+              onClick={() => setUpdatingSizes(true)}
+            >
+              Add New Size Names
+            </Button>
+          </Stack>
 
           <TableContainer className={styles.tableContainer}>
             <Table size="small">
@@ -177,7 +184,6 @@ const AdminPanel = ({ navigate, setIsAuthenticated }) => {
                               size="small"
                               sx={{ whiteSpace: "nowrap", minWidth: "auto" }}
                               onClick={() => {
-                                // editingBrand.current = brand.id;
                                 setEditingBrand(brand.id);
                               }}
                             >
@@ -194,7 +200,7 @@ const AdminPanel = ({ navigate, setIsAuthenticated }) => {
                               justifyContent="flex-start"
                             >
                               {models
-                                .filter((model) => model.modelName !== null)
+                                .filter((model) => model.id !== null)
                                 .sort((a, b) =>
                                   a.modelName.localeCompare(b.modelName)
                                 )
@@ -222,7 +228,6 @@ const AdminPanel = ({ navigate, setIsAuthenticated }) => {
               color="success"
               onClick={() => {
                 setAddingBrand(true);
-                // addingBrand = true;
               }}
             >
               Add New Brand
@@ -230,87 +235,15 @@ const AdminPanel = ({ navigate, setIsAuthenticated }) => {
           </TableContainer>
         </div>
       </Card>
-      <Modal open={addingBrand}>
-        <Card
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            border: "2px solid #000",
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <Stack
-            direction="row"
-            spacing={1}
-            padding={2}
-          >
-            <Stack spacing={1}>
-              <Stack
-                spacing={1}
-                direction="row"
-              >
-                <TextField
-                  label="New Brand Name"
-                  onChange={(e) => {
-                    const index = brands.findIndex(
-                      (brand) => brand.id === null
-                    );
-
-                    setBrands((state) => {
-                      if (index >= 0) {
-                        return brands.map((brand, ind) => {
-                          if (ind === index) {
-                            return { ...brand, brandName: e.target.value };
-                          } else {
-                            return brand;
-                          }
-                        });
-                      } else {
-                        return [
-                          ...state,
-                          { id: null, brandName: e.target.value },
-                        ];
-                      }
-                    });
-                  }}
-                  value={
-                    brands.findIndex((brand) => brand.id === null) >= 0
-                      ? brands.find((brand) => brand.id === null).brandName
-                      : ""
-                  }
-                />
-                <Button onClick={() => handleAddNewBrand()}>Save Brand</Button>
-                <Button onClick={() => handleCancelAddNewBrand()}>
-                  Cancel
-                </Button>
-              </Stack>
-            </Stack>
-            <Collapse
-              in={false}
-              unmountOnExit
-            >
-              <Stack>
-                <FormGroup row>
-                  {sizes.map((size) => {
-                    return (
-                      <FormControlLabel
-                        label={size.sizeName}
-                        control={<Checkbox />}
-                      />
-                    );
-                  })}
-                </FormGroup>
-              </Stack>
-            </Collapse>
-          </Stack>
-        </Card>
-      </Modal>
-      <BrandModal {...modalProps} />
+      <PropContext.Provider value={measurements}>
+        <BrandModal {...modalProps} />
+      </PropContext.Provider>
+      <NewSizesMenu
+        updatingSizes={updatingSizes}
+        setUpdatingSizes={setUpdatingSizes}
+        sizes={sizes}
+        setSizes={setSizes}
+      />
     </motion.div>
   );
 };
