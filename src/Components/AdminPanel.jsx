@@ -49,12 +49,12 @@ const AdminPanel = ({ navigate, setIsAuthenticated }) => {
   //commands
 
   const handleLogout = async () => {
-    await logout().then((response) => {
-      if (response.status === 200) {
-        setIsAuthenticated(false);
-        navigate("/login");
-      }
-    });
+    // await logout().then((response) => {
+    //   if (response.status === 200) {
+    setIsAuthenticated(false);
+    navigate("/admin");
+    //   }
+    // });
   };
 
   const handleAddNewBrand = async () => {

@@ -10,6 +10,7 @@ const modelSizeAddress = "https://localhost:7287/api/ModelSize";
 const userAddress = "https://localhost:7287/api/User";
 const userRegisterAddress = "https://localhost:7287/api/User/Register";
 const userLoginAddress = "https://localhost:7287/api/User/Login";
+const userAdminLoginAddress = "https://localhost:7287/api/User/Admin";
 const userModelsAddress = "https://localhost:7287/api/User_Model";
 const userSubmissionsAddress = "https://localhost:7287/api/UserSubmissions";
 const authAddress = "https://localhost:7287/api/Auth";
@@ -78,6 +79,17 @@ const loginUser = async (user) => {
       .post(userLoginAddress, user, {
         withCredentials: true,
       })
+      .then((response) => response);
+    return output;
+  } catch (error) {
+    return error.response;
+  }
+};
+
+const loginAdmin = async (user) => {
+  try {
+    const output = await axios
+      .post(userAdminLoginAddress, user, { withCredentials: true })
       .then((response) => response);
     return output;
   } catch (error) {
@@ -174,6 +186,7 @@ export {
   patchUser,
   registerUser,
   loginUser,
+  loginAdmin,
   postUserModels,
   getUserModels,
   authorize,

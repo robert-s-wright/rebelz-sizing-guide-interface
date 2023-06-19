@@ -50,6 +50,7 @@ function App() {
 
   const [user, setUser] = useState(blankUser);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminIsAuthenticated, setAdminIsAuthenticated] = useState(false);
 
   const navigate = useNavigate();
 
@@ -81,6 +82,8 @@ function App() {
     navigate,
     setIsAuthenticated,
     isAuthenticated,
+    adminIsAuthenticated,
+    setAdminIsAuthenticated,
   };
 
   return (
@@ -131,7 +134,16 @@ function App() {
         />
         <Route
           path="/admindashboard"
-          element={<AdminPanel {...props} />}
+          element={
+            adminIsAuthenticated ? (
+              <AdminPanel {...props} />
+            ) : (
+              <Navigate
+                replace
+                to="/admin"
+              />
+            )
+          }
         />
       </Routes>
     </AnimatePresence>

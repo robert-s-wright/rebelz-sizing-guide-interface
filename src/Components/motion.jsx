@@ -3,13 +3,13 @@ const animation = {
     // scale: 0.9,
     opacity: 0.3,
     borderRadius: "50%",
-    y: 50,
+    // y: 50,
   },
   animate: { scale: 1, opacity: 1, y: 0 },
   exit: {
     // scale: 0.9,
     opacity: 0.3,
-    y: 50,
+    // y: 50,
   },
   transition: {
     duration: 0.2,

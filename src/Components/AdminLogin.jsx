@@ -14,7 +14,7 @@ import {
 
 import styles from "./Login.module.css";
 
-import { loginUser } from "../requests";
+import { loginAdmin } from "../requests";
 
 import Header from "./Header";
 
@@ -24,15 +24,41 @@ import { animation } from "./motion";
 
 import rebelzIcon from "./../Rebelz-R-Logo-1000x1000px_72dpi-32x32.jpg";
 
-const AdminLogin = ({ user, setUser, navigate, blankUser }) => {
+const AdminLogin = ({
+  user,
+  setUser,
+  navigate,
+  blankUser,
+  setAdminIsAuthenticated,
+}) => {
   const [showAlert, setShowAlert] = useState(false);
   const [alert, setAlert] = useState(null);
 
-  const handleLogin = async () => {};
+  const handleLogin = async () => {
+    const output = await loginAdmin(user);
+
+    console.log(output);
+
+    if (output.status === 200) {
+      setAdminIsAuthenticated(true);
+      setUser(output.data);
+
+      navigate("admindashboard");
+    } else if (output.status === 403) {
+      setAlert("You lack rights to access the admin dashboard");
+      setShowAlert(true);
+    } else if (output.status === 401) {
+      setAlert("Invaid username and/or password.");
+      setShowAlert(true);
+    } else {
+      setAlert("An unexpected error occurred, please try again.");
+      setShowAlert(true);
+    }
+  };
 
   useEffect(() => {
     setUser(blankUser);
-  });
+  }, []);
 
   return (
     <motion.div
@@ -117,9 +143,9 @@ const AdminLogin = ({ user, setUser, navigate, blankUser }) => {
           <Link
             underline="hover"
             sx={{ cursor: "pointer" }}
-            onClick={() => navigate("/recovery")}
+            onClick={() => navigate("/login")}
           >
-            Forgot your username or password?
+            Back to User Login
           </Link>
           <Collapse in={showAlert}>
             <Alert severity="warning">{alert}</Alert>

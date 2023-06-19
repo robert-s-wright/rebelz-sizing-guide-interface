@@ -130,6 +130,13 @@ const Login = React.forwardRef(
             >
               Forgot your username or password?
             </Link>
+            <Link
+              underline="hover"
+              sx={{ cursor: "pointer" }}
+              onClick={() => navigate("/admin")}
+            >
+              Login to administration panel
+            </Link>
             <Collapse in={showAlert}>
               <Alert severity="warning">{alert}</Alert>
             </Collapse>
